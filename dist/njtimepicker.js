@@ -677,10 +677,14 @@
 
           }
 
-          _this2.emitter.emit('clear');
+          _this2.emitter.emit('clear', {
+            pluginConfig: _this2.config
+          });
         });
         this.emitter.on('btn-close', function () {
-          _this2.emitter.emit('close');
+          _this2.emitter.emit('close', {
+            pluginConfig: _this2.config
+          });
 
           _this2.hide();
         });
@@ -690,14 +694,25 @@
     }, {
       key: "buildItems",
       value: function buildItems() {
-        // create hours contianer
-        this.hours = new PickerHour(this.config, this.emitter);
-        this.container.append(this.hours.element); // create minutes contianer
+        this.config.enabledFields = Array.isArray(this.config.enabledFields) ? this.config.enabledFields : [];
+        var canBuildHours = this.config.enabledFields.indexOf('hours') >= 0;
+        var canBuildMins = this.config.enabledFields.indexOf('minutes') >= 0;
+        var canBuildAmPm = this.config.enabledFields.indexOf('ampm') >= 0;
 
-        this.minutes = new PickerMinute(this.config, this.emitter);
-        this.container.append(this.minutes.element); // create ampm contianer
+        if (canBuildHours) {
+          // create hours contianer
+          this.hours = new PickerHour(this.config, this.emitter);
+          this.container.append(this.hours.element);
+        }
 
-        if (this.config.format == '12') {
+        if (canBuildMins) {
+          // create minutes contianer
+          this.minutes = new PickerMinute(this.config, this.emitter);
+          this.container.append(this.minutes.element);
+        } // create ampm contianer
+
+
+        if (this.config.format == '12' && canBuildAmPm) {
           this.ampm = new PickerAMPM(this.config, this.emitter);
           this.container.append(this.ampm.element);
         }
@@ -713,12 +728,13 @@
       key: "getValue",
       value: function getValue(key) {
         var result = {
-          hours: this.hours.getValue(),
-          minutes: this.minutes.getValue(),
-          fullResult: undefined
+          hours: this.hours ? this.hours.getValue() : undefined,
+          minutes: this.minutes ? this.minutes.getValue() : undefined,
+          fullResult: undefined,
+          pluginConfig: this.config
         };
 
-        if (this.config.format == '12') {
+        if (this.config.format == '12' && this.ampm) {
           result.ampm = this.ampm.getValue();
           if (result.hours && result.minutes && result.ampm) result.fullResult = "".concat(("0" + result.hours).slice(-2), ":").concat(("0" + result.minutes).slice(-2), " ").concat(result.ampm);
         } else {
@@ -792,6 +808,7 @@
           // auto save if for the first time
           disabledMinutes: [],
           disabledHours: [],
+          enabledFields: ['hours', 'minutes', 'ampm'],
           format: '12',
           texts: {
             header: '',

@@ -46,59 +46,81 @@
             text-align: center;
             border: 1px solid #fff;
             border-radius: 6px;
+            min-width: 5em;
         }
     </style>
 </head>
 
 <body>
     <div class="wrapper">
-        <label for="format_12">12 Hour</label>
+        <label for="format_12">Hours Only</label>
         <div class="container" id="format_12">
-            --:-- --
+            --
         </div>
     </div>
     <div class="wrapper">
-        <label for="format_24">24 Hour</label>
+        <label for="format_24">Minutes Only</label>
         <div class="container" id="format_24">
-            --:--
+            --
+        </div>
+    </div>
+    <div class="wrapper" style="margin-left: 2em;">
+        <label for="format_24">Multiple Initialised Pickers</label>
+        <div style="display: flex;">
+            <div class="container" id="multi_1" style="margin-right: 1em;">
+                --
+            </div>
+            <div class="container" id="multi_2">
+                --
+            </div>
         </div>
     </div>
     <script src="../dist/njtimepicker.js"></script>
     <script>
         (function () {
-            let format_12 = document.querySelector('#format_12');
-            var format_12_picker = new NJTimePicker({
+            let hoursOnly = document.querySelector('#format_12');
+            var housrs_only_picker = new NJTimePicker({
                 targetID: 'format_12',
                 autoSave: true,
+                enabledFields: ['hours'],
                 texts: {
-                    header: '12-Hour Picker'
+                    header: 'Hours Only Picker'
                 }
             });
-            format_12_picker.on('save', function (data) {
-                if (data.fullResult)
-                    format_12.textContent = data.fullResult;
-            });
-            format_12_picker.on('ready', function (data) {
-                return
-                format_12_picker.setValue({
-                    hours: 12,
-                    minutes: 45,
-                    ampm: 'am'
-                });
+            housrs_only_picker.on('save', function (data) {
+                if (data.hours)
+                    hoursOnly.textContent = `${data.hours} hours`;
             });
 
-            let format_24 = document.querySelector('#format_24');
-            var format_24_picker = new NJTimePicker({
-                targetEl: format_24,
+            let minsOnly = document.querySelector('#format_24');
+            var mins_only_picker = new NJTimePicker({
+                targetEl: minsOnly,
+                enabledFields: ['minutes'],
                 texts: {
-                    header: '24-Hour Picker'
+                    header: 'Minutes Picker'
                 },
                 format: '24'
             });
-            format_24_picker.on('save', function (data) {
-                if (data.fullResult)
-                    format_24.textContent = data.fullResult;
+            mins_only_picker.on('save', function (data) {
+                if (data.minutes)
+                    minsOnly.textContent = `${data.minutes} minutes`;
             });
+
+            // MUTLIPLE PICKER IMPLEMENTATION
+            ['multi_1', 'multi_2'].forEach(pickerID => {
+                let pickerEL = document.querySelector(`#${pickerID}`);
+                var pickerInstance = new NJTimePicker({
+                    targetEl: pickerEL,
+                    texts: {
+                        header: 'Multi Init Picker'
+                    },
+                    format: '24'
+                });
+                pickerInstance.on('save', function (data) {
+                    if (data.fullResult)
+                        pickerEL.textContent = `${data.fullResult}`;
+                });
+            })
         })();
     </script>
 </body>

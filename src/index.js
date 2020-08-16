@@ -30,6 +30,7 @@ export default class NJTimePicker {
             autoSave: false, // auto save if for the first time
             disabledMinutes: [],
             disabledHours: [],
+            enabledFields: ['hours', 'minutes', 'ampm'],
             format: '12',
             texts: {
                 header: '',
@@ -143,10 +144,14 @@ export default class NJTimePicker {
             if (this.config.format == '12') {
                 this.ampm.resetValue(); // resets am-pm
             }
-            this.emitter.emit('clear');
+            this.emitter.emit('clear', {
+                pluginConfig: this.config
+            });
         });
         this.emitter.on('btn-close', () => {
-            this.emitter.emit('close');
+            this.emitter.emit('close', {
+                pluginConfig: this.config
+            });
             this.hide();
         });
         this.container.append(this.buttons.build(this.config));
@@ -154,14 +159,25 @@ export default class NJTimePicker {
 
     // build individual items
     buildItems() {
-        // create hours contianer
-        this.hours = new hours(this.config, this.emitter);
-        this.container.append(this.hours.element);
-        // create minutes contianer
-        this.minutes = new minutes(this.config, this.emitter);
-        this.container.append(this.minutes.element);
+        this.config.enabledFields = Array.isArray(this.config.enabledFields) ? this.config.enabledFields : [];
+        const canBuildHours = this.config.enabledFields.indexOf('hours') >= 0;
+        const canBuildMins = this.config.enabledFields.indexOf('minutes') >= 0;
+        const canBuildAmPm = this.config.enabledFields.indexOf('ampm') >= 0;
+
+        if (canBuildHours) {
+            // create hours contianer
+            this.hours = new hours(this.config, this.emitter);
+            this.container.append(this.hours.element);
+        }
+
+        if (canBuildMins) {
+            // create minutes contianer
+            this.minutes = new minutes(this.config, this.emitter);
+            this.container.append(this.minutes.element);
+        }
+
         // create ampm contianer
-        if (this.config.format == '12') {
+        if (this.config.format == '12' && canBuildAmPm) {
             this.ampm = new ampm(this.config, this.emitter);
             this.container.append(this.ampm.element);
         }
@@ -174,11 +190,12 @@ export default class NJTimePicker {
     // get the picker value
     getValue(key) {
         let result = {
-            hours: this.hours.getValue(),
-            minutes: this.minutes.getValue(),
-            fullResult: undefined
+            hours: this.hours ? this.hours.getValue() : undefined,
+            minutes: this.minutes ? this.minutes.getValue() : undefined,
+            fullResult: undefined,
+            pluginConfig: this.config
         };
-        if (this.config.format == '12') {
+        if (this.config.format == '12' && this.ampm) {
             result.ampm = this.ampm.getValue();
             if (result.hours && result.minutes && result.ampm)
                 result.fullResult = `${("0" + result.hours).slice(-2)}:${("0" + result.minutes).slice(-2)} ${result.ampm}`;
