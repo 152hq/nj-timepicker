@@ -63,6 +63,7 @@ The plugin ships with various configuration and events that can be used to meet 
 | minutes            | `array`            | `[0, 15, 30, 45]`        | a list of minutes |
 | disabledHours      | `array`            | `[]`                     | a list of disabled Hours |
 | disabledMinutes    | `array`            | `[]`                     | a list of disabled Minutes |
+| enabledFields      | `array`            | `['hours', 'minutes', 'ampm']`  | a list of enabled fields |
 | texts              | `object`           | `{`<br>`header: ''`<br>`hours: 'Hours'`<br>`minutes: 'Minutes'`<br>`ampm: 'AM/PM'`<br>`save: 'Save'`<br>`clear: 'Clear'`<br>`close: 'Close'`<br>`}`| picker texts |
 
 ### Methods
